@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -51,11 +52,13 @@ func downloadURLs(file *os.File, dirName string) {
 		fmt.Println(scanner.Text())
 		err := downloadFile(url, filename + ".jpg")
 		if err != nil {
-			fmt.Println(err)
-			fmt.Println("Re request by changing extension")
-
 			rep := regexp.MustCompile(`\.(jpg)$`)
 			url := rep.ReplaceAllString(url, ".png")
+
+			fmt.Println(err)
+			fmt.Println("Re request by changing extension")
+			fmt.Println(url)
+			fmt.Println("------------------------------")
 
 			downloadFile(url, filename + ".png")
 		}
@@ -67,7 +70,10 @@ func downloadURLs(file *os.File, dirName string) {
 }
 
 func downloadFile(URL, fileName string) error {
-	response, err := http.Get(URL)
+	client := http.Client{
+		Timeout: 1 * time.Second,
+	}
+	response, err := client.Get(URL)
 	if err != nil {
 		return err
 	}
@@ -116,7 +122,10 @@ func touchOutputFile(filePath string) *os.File {
 }
 
 func makeDirectory(doc *goquery.Document) string {
-	header := doc.Find("h1").Text()
+	actualHeader := doc.Find("h1").Text()
+	sanitizeRep := regexp.MustCompile(`^\(.+\)\s`)
+	header := sanitizeRep.ReplaceAllString(actualHeader, "")
+
 	dirName := "../results/" + header
 	err := os.Mkdir(dirName, 0777)
 	if err != nil {
