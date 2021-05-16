@@ -19,7 +19,10 @@ const imageHostPattern = ""
 
 func main() {
 	// _. DOM を取得
-	doc := getDoc(requestURL)
+	doc, err := getDoc(requestURL)
+	if err != nil {
+		panic(err)
+	}
 
 	// 1. 保存用のディレクトリ用意
 	dirName := makeDirectory(doc)
@@ -71,7 +74,7 @@ func downloadURLs(file *os.File, dirName string) {
 
 func downloadFile(URL, fileName string) error {
 	client := http.Client{
-		Timeout: 1 * time.Second,
+		Timeout: 5 * time.Second,
 	}
 	response, err := client.Get(URL)
 	if err != nil {
@@ -97,7 +100,11 @@ func downloadFile(URL, fileName string) error {
 
 func writeURLs(doc *goquery.Document, file *os.File) {
 	doc.Find("img").Each(func(_ int, s *goquery.Selection) {
-		url, _ := s.Attr("data-src")
+		url, bool := s.Attr("data-src")
+		if bool != true {
+			fmt.Println("URL が見つかりません")
+		}
+		// url, _ := s.Attr("src")
 		if isMatchHost(url) != true {
 			return
 		}
@@ -121,7 +128,7 @@ func touchOutputFile(filePath string) *os.File {
 	return file
 }
 
-func makeDirectory(doc *goquery.Document) string {
+func makeDirectory(doc *goquery.Document) (string) {
 	actualHeader := doc.Find("h1").Text()
 	sanitizeRep := regexp.MustCompile(`^\(.+\)\s`)
 	header := sanitizeRep.ReplaceAllString(actualHeader, "")
@@ -131,12 +138,12 @@ func makeDirectory(doc *goquery.Document) string {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("Title: 「%s」\n", header)
+	fmt.Printf("Title: %s\n", header)
 
 	return dirName
 }
 
-func getDoc(url string) *goquery.Document {
+func getDoc(url string) (*goquery.Document, error) {
 	res, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err)
@@ -144,6 +151,6 @@ func getDoc(url string) *goquery.Document {
 	}
 	defer res.Body.Close()
 
-	doc, _ := goquery.NewDocumentFromReader(res.Body)
-	return doc
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	return doc, err
 }
