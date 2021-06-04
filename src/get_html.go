@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+	"path/filepath"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -74,7 +75,7 @@ func downloadURLs(file *os.File, dirName string) {
 
 func downloadFile(URL, fileName string) error {
 	client := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 1 * time.Second,
 	}
 	response, err := client.Get(URL)
 	if err != nil {
@@ -132,13 +133,12 @@ func makeDirectory(doc *goquery.Document) (string) {
 	actualHeader := doc.Find("h1").Text()
 	sanitizeRep := regexp.MustCompile(`^\(.+\)\s`)
 	header := sanitizeRep.ReplaceAllString(actualHeader, "")
-
-	dirName := "../results/" + header
+	dirName :=	filepath.Dir("../results/" + header)
+	fmt.Printf("Title: %s\n", dirName)
 	err := os.Mkdir(dirName, 0777)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
-	fmt.Printf("Title: %s\n", header)
 
 	return dirName
 }
