@@ -7,10 +7,10 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"time"
-	"path/filepath"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -133,11 +133,19 @@ func makeDirectory(doc *goquery.Document) (string) {
 	actualHeader := doc.Find("h1").Text()
 	sanitizeRep := regexp.MustCompile(`^\(.+\)\s`)
 	header := sanitizeRep.ReplaceAllString(actualHeader, "")
-	dirName :=	filepath.Dir("../results/" + header)
-	fmt.Printf("Title: %s\n", dirName)
+	fmt.Printf("Title: %s\n", header)
+
+	path := "../results/" + header
+	dirName := filepath.Dir(path)
 	err := os.Mkdir(dirName, 0777)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+	} else {
+		err := os.Mkdir(path, 0777)
+
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return dirName
