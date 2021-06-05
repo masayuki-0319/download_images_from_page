@@ -136,19 +136,20 @@ func makeDirectory(doc *goquery.Document) (string) {
 	fmt.Printf("Title: %s\n", header)
 
 	path := "../results/" + header
-	dirName := filepath.Dir(path)
-	err := os.Mkdir(dirName, 0777)
+	err := os.Mkdir(path, 0777)
+	returnDirName := path
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		err := os.Mkdir(path, 0777)
 
+		dirName := filepath.Dir(path)
+		err := os.Mkdir(dirName, 0777)
+		returnDirName = dirName
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	return dirName
+	return returnDirName
 }
 
 func getDoc(url string) (*goquery.Document, error) {
