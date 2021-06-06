@@ -3,9 +3,11 @@ package main
 import (
 	"bufio"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -15,10 +17,13 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-const requestURL = ""
 const imageHostPattern = ""
 
 func main() {
+	// _. CLI からの引数を検証
+	flag.Parse()
+	requestURL := validateArgs(flag.Args())
+
 	// _. DOM を取得
 	doc, err := getDoc(requestURL)
 	if err != nil {
@@ -152,8 +157,8 @@ func makeDirectory(doc *goquery.Document) (string) {
 	return returnDirName
 }
 
-func getDoc(url string) (*goquery.Document, error) {
-	res, err := http.Get(url)
+func getDoc(url *url.URL) (*goquery.Document, error) {
+	res, err := http.Get(url.String())
 	if err != nil {
 		fmt.Println(err)
 		panic("Fail get HTML")
@@ -162,4 +167,16 @@ func getDoc(url string) (*goquery.Document, error) {
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	return doc, err
+}
+
+func validateArgs(args []string) (*url.URL) {
+	if len(args) == 0 {
+		panic("Error: Set target URL for first args.")
+	}
+
+	requestURL, err := url.ParseRequestURI(args[0])
+	if err != nil {
+		panic(err)
+	}
+	return requestURL
 }
