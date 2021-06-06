@@ -25,10 +25,7 @@ func main() {
 	requestURL := validateArgs(flag.Args())
 
 	// _. DOM を取得
-	doc, err := getDoc(requestURL)
-	if err != nil {
-		panic(err)
-	}
+	doc := getDoc(requestURL)
 
 	// 1. 保存用のディレクトリ用意
 	dirName := makeDirectory(doc)
@@ -157,7 +154,7 @@ func makeDirectory(doc *goquery.Document) (string) {
 	return returnDirName
 }
 
-func getDoc(url *url.URL) (*goquery.Document, error) {
+func getDoc(url *url.URL) (*goquery.Document) {
 	res, err := http.Get(url.String())
 	if err != nil {
 		fmt.Println(err)
@@ -166,7 +163,11 @@ func getDoc(url *url.URL) (*goquery.Document, error) {
 	defer res.Body.Close()
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
-	return doc, err
+	if err != nil {
+		panic(err)
+	}
+
+	return doc
 }
 
 func validateArgs(args []string) (*url.URL) {
