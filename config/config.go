@@ -17,7 +17,7 @@ type GetHTMLConfigList struct {
 var Config GetHTMLConfigList
 
 func init() {
-	cfg, err := ini.Load("../config.ini")
+	cfg, err := ini.Load("config.ini")
 	if err != nil {
 		log.Printf("Failed to read file: %v", err)
 		os.Exit(1)
