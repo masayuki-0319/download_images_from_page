@@ -1,0 +1,17 @@
+package config
+
+// GetHTMLConfigList ...
+type GetHTMLConfigList struct {
+	ImgURLPattern	string
+	StoreDir		string
+}
+
+// Config ...
+var Config GetHTMLConfigList
+
+func init() {
+	Config = GetHTMLConfigList{
+		ImgURLPattern:	"",
+		StoreDir:		"",
+	}
+}

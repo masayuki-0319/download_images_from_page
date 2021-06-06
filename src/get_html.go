@@ -14,10 +14,13 @@ import (
 	"strconv"
 	"time"
 
+	"get_html/config"
+
 	"github.com/PuerkitoBio/goquery"
 )
 
-const imageHostPattern = ""
+var imageHostPattern = config.Config.ImgURLPattern
+var resultDir = config.Config.StoreDir
 
 func main() {
 	// _. CLI からの引数を検証
@@ -137,13 +140,15 @@ func makeDirectory(doc *goquery.Document) (string) {
 	header := sanitizeRep.ReplaceAllString(actualHeader, "")
 	fmt.Printf("Title: %s\n", header)
 
-	path := "../results/" + header
-	err := os.Mkdir(path, 0777)
-	returnDirName := path
+	exe, _ := os.Getwd()
+	absStorePath := exe + "/" + resultDir + "/" + header
+
+	err := os.Mkdir(absStorePath, 0777)
+	returnDirName := absStorePath
 	if err != nil {
 		fmt.Println(err)
 
-		dirName := filepath.Dir(path)
+		dirName := filepath.Dir(absStorePath)
 		err := os.Mkdir(dirName, 0777)
 		returnDirName = dirName
 		if err != nil {
@@ -151,6 +156,7 @@ func makeDirectory(doc *goquery.Document) (string) {
 		}
 	}
 
+	fmt.Println(filepath.Abs(returnDirName))
 	return returnDirName
 }
 
